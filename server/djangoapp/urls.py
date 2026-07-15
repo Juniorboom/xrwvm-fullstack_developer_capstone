@@ -1,18 +1,35 @@
-# Uncomment the imports before you add the code
-# from django.urls import path
+from django.urls import path
 from django.conf.urls.static import static
 from django.conf import settings
-# from . import views
+from . import views
+
 
 app_name = 'djangoapp'
+
+
 urlpatterns = [
-    # # path for registration
+    # Registration route
+path(
+    route='register',
+    view=views.registration,
+    name='register'
+),
 
-    # path for login
-    # path(route='login', view=views.login_user, name='login'),
+    # Login route
+    path(
+        route='login',
+        view=views.login_user,
+        name='login'
+    ),
 
-    # path for dealer reviews view
+    # Logout route
+    path(
+        route='logout',
+        view=views.logout_request,
+        name='logout'
+    ),
 
-    # path for add a review view
-
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(
+    settings.MEDIA_URL,
+    document_root=settings.MEDIA_ROOT
+)
