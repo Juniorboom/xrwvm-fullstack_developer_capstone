@@ -54,7 +54,7 @@ jobs:
 
       - name: Create JSHint Configuration
         run: |
-          echo '{"esversion": 6}' > .jshintrc
+          echo '{"esversion": 8, "sub": true}' > .jshintrc
 
       - name: Run Linter
         run: |
