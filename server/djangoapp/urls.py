@@ -8,12 +8,13 @@ app_name = 'djangoapp'
 
 
 urlpatterns = [
+
     # Registration route
-path(
-    route='register',
-    view=views.registration,
-    name='register'
-),
+    path(
+        route='register',
+        view=views.registration,
+        name='register'
+    ),
 
     # Login route
     path(
@@ -27,6 +28,13 @@ path(
         route='logout',
         view=views.logout_request,
         name='logout'
+    ),
+
+    # Get all car models and car makes
+    path(
+        route='get_cars',
+        view=views.get_cars,
+        name='getcars'
     ),
 
 ] + static(

@@ -18,13 +18,12 @@ SECRET_KEY = (
 
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'localhost',
-    'kavya141005-8000.theianext-0-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai'
-]
+# Allow the Skills Network lab proxy
+ALLOWED_HOSTS = ['*']
 
+# Trust all Cognitive Class lab proxy URLs
 CSRF_TRUSTED_ORIGINS = [
-    'https://kavya141005-8000.theianext-0-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai'
+    'https://*.proxy.cognitiveclass.ai',
 ]
 
 
@@ -62,11 +61,11 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
 
-       'DIRS': [
-    os.path.join(BASE_DIR, 'frontend/static'),
-    os.path.join(BASE_DIR, 'frontend/build'),
-    os.path.join(BASE_DIR, 'frontend/build/static'),
-],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'frontend/static'),
+            os.path.join(BASE_DIR, 'frontend/build'),
+            os.path.join(BASE_DIR, 'frontend/build/static'),
+        ],
 
         'APP_DIRS': True,
 
