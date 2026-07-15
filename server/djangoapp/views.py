@@ -5,6 +5,11 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import CarMake, CarModel
 from .populate import initiate
+from .restapis import (
+    get_request,
+    analyze_review_sentiments,
+    post_review
+)
 
 import logging
 import json
@@ -18,13 +23,11 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 def login_user(request):
 
-    # Get username and password from the request body
     data = json.loads(request.body)
 
     username = data['userName']
     password = data['password']
 
-    # Authenticate the user
     user = authenticate(
         username=username,
         password=password
@@ -34,7 +37,6 @@ def login_user(request):
         "userName": username
     }
 
-    # Log in if the credentials are correct
     if user is not None:
 
         login(request, user)
@@ -50,10 +52,8 @@ def login_user(request):
 # Logout view
 def logout_request(request):
 
-    # Terminate the current user session
     logout(request)
 
-    # Return an empty username
     data = {
         "userName": ""
     }
@@ -65,7 +65,6 @@ def logout_request(request):
 @csrf_exempt
 def registration(request):
 
-    # Read registration details from the request
     data = json.loads(request.body)
 
     username = data['userName']
@@ -74,15 +73,15 @@ def registration(request):
     last_name = data['lastName']
     email = data['email']
 
-    # Check whether the username already exists
-    if User.objects.filter(username=username).exists():
+    if User.objects.filter(
+        username=username
+    ).exists():
 
         return JsonResponse({
             "userName": username,
             "error": "Already Registered"
         })
 
-    # Create the new user
     user = User.objects.create_user(
         username=username,
         password=password,
@@ -91,7 +90,6 @@ def registration(request):
         last_name=last_name
     )
 
-    # Log in the newly registered user
     login(request, user)
 
     return JsonResponse({
@@ -100,19 +98,17 @@ def registration(request):
     })
 
 
-# Get all car models and their corresponding car makes
+# Get all car models and car makes
 def get_cars(request):
 
-    # Check whether any car models exist
     count = CarModel.objects.count()
 
-    # Populate the database if no car models exist
     if count == 0:
         initiate()
 
-    # Get car models with their related car makes
-    car_models = CarModel.objects.select_related(
-        'car_make'
+    car_models = (
+        CarModel.objects
+        .select_related('car_make')
     )
 
     cars = []
@@ -124,7 +120,149 @@ def get_cars(request):
             "CarMake": car_model.car_make.name
         })
 
-    # Return all car models as JSON
     return JsonResponse({
         "CarModels": cars
+    })
+
+
+# Get all dealerships or dealerships by state
+def get_dealerships(
+    request,
+    state="All"
+):
+
+    if state == "All":
+
+        endpoint = "/fetchDealers"
+
+    else:
+
+        endpoint = (
+            "/fetchDealers/"
+            + state
+        )
+
+    dealerships = get_request(
+        endpoint
+    )
+
+    return JsonResponse({
+        "status": 200,
+        "dealers": dealerships
+    })
+
+
+# Get the details of one dealer
+def get_dealer_details(
+    request,
+    dealer_id
+):
+
+    endpoint = (
+        "/fetchDealer/"
+        + str(dealer_id)
+    )
+
+    dealer = get_request(
+        endpoint
+    )
+
+    return JsonResponse({
+        "status": 200,
+        "dealer": dealer
+    })
+
+
+# Get reviews for a particular dealer
+def get_dealer_reviews(
+    request,
+    dealer_id
+):
+
+    endpoint = (
+        "/fetchReviews/dealer/"
+        + str(dealer_id)
+    )
+
+    reviews = get_request(
+        endpoint
+    )
+
+    # Add sentiment to every review
+    if reviews is not None:
+
+        for review_detail in reviews:
+
+            review_text = (
+                review_detail.get(
+                    "review",
+                    ""
+                )
+            )
+
+            sentiment_response = (
+                analyze_review_sentiments(
+                    review_text
+                )
+            )
+
+            if sentiment_response:
+
+                review_detail["sentiment"] = (
+                    sentiment_response.get(
+                        "sentiment",
+                        "neutral"
+                    )
+                )
+
+            else:
+
+                review_detail["sentiment"] = (
+                    "neutral"
+                )
+
+    return JsonResponse({
+        "status": 200,
+        "reviews": reviews
+    })
+
+
+# Add a new dealer review
+@csrf_exempt
+def add_review(request):
+
+    # Only authenticated users can post reviews
+    if not request.user.is_anonymous:
+
+        data = json.loads(
+            request.body
+        )
+
+        try:
+
+            response = post_review(
+                data
+            )
+
+            return JsonResponse({
+                "status": 200,
+                "response": response
+            })
+
+        except Exception as error:
+
+            logger.error(
+                "Error posting review: %s",
+                error
+            )
+
+            return JsonResponse({
+                "status": 401,
+                "message":
+                    "Error in posting review"
+            })
+
+    return JsonResponse({
+        "status": 403,
+        "message": "Unauthorized"
     })
