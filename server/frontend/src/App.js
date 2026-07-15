@@ -1,5 +1,8 @@
 import LoginPanel from "./components/Login/Login";
 import Register from "./components/Register/Register";
+import Dealers from "./components/Dealers/Dealers";
+import Dealer from "./components/Dealers/Dealer";
+import PostReview from "./components/Dealers/PostReview";
 
 import {
   Routes,
@@ -23,6 +26,24 @@ function App() {
       <Route
         path="/register"
         element={<Register />}
+      />
+
+      {/* All dealerships page */}
+      <Route
+        path="/dealers"
+        element={<Dealers />}
+      />
+
+      {/* Dealer details and reviews page */}
+      <Route
+        path="/dealer/:id"
+        element={<Dealer />}
+      />
+
+      {/* Add a dealer review page */}
+      <Route
+        path="/postreview/:id"
+        element={<PostReview />}
       />
 
     </Routes>
