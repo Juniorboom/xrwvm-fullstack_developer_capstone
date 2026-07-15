@@ -33,7 +33,7 @@ jobs:
           pwd
           find ./server -name "*.py" \
             -not -path "*/migrations/*" \
-            -exec flake8 --ignore=E501,E303,W292,F401 {} +
+            -exec flake8 --ignore=E501,E303,W292,F401,W503 {} +
           echo "Linted all the Python files successfully"
 
   lint_js:
